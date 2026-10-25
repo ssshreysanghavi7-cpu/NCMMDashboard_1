@@ -1,0 +1,738 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>NCMM Component Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+/* Layout: sticky masthead · fixed target strip · component rail · single detail column */
+:root{
+  --bg:#f5f6f6; --surface:#ffffff; --surface-2:#eef1f1; --line:#dde2e3; --line-strong:#c3cbcc;
+  --ink:#16201f; --ink-2:#4d5a59; --ink-3:#778584;
+  --brand:#0f3d3c; --brand-soft:#e3eceb;
+  --ok:#1f7a4d; --ok-bg:#e4f2ea;
+  --live:#1d6098; --live-bg:#e2edf6;
+  --warn:#9c6511; --warn-bg:#f7eddc;
+  --idle:#6b7679; --idle-bg:#e9eced;
+  --none:#8a9294; --none-bg:transparent;
+  --font-d:"Archivo",ui-sans-serif,system-ui,sans-serif;
+  --font-b:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --font-m:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1414; --surface:#161e1e; --surface-2:#1d2726; --line:#2a3534; --line-strong:#3c4848;
+  --ink:#e7eeed; --ink-2:#a5b2b1; --ink-3:#7c8a89;
+  --brand:#8fc7c2; --brand-soft:#1b2a29;
+  --ok:#5bb98b; --ok-bg:#15291f;
+  --live:#6aa9dd; --live-bg:#13232f;
+  --warn:#d6a14d; --warn-bg:#2a2112;
+  --idle:#8a9597; --idle-bg:#1e2626;
+  --none:#798486; --none-bg:transparent;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1414; --surface:#161e1e; --surface-2:#1d2726; --line:#2a3534; --line-strong:#3c4848;
+  --ink:#e7eeed; --ink-2:#a5b2b1; --ink-3:#7c8a89;
+  --brand:#8fc7c2; --brand-soft:#1b2a29;
+  --ok:#5bb98b; --ok-bg:#15291f;
+  --live:#6aa9dd; --live-bg:#13232f;
+  --warn:#d6a14d; --warn-bg:#2a2112;
+  --idle:#8a9597; --idle-bg:#1e2626;
+  --none:#798486; --none-bg:transparent;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-b);line-height:1.5;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--surface)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1140px;margin:0 auto}
+h1,h2,h3{font-family:var(--font-d);text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* masthead */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{padding-block:14px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:baseline;justify-content:space-between}
+.mark{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+h1{font-size:1.18rem;font-weight:700;letter-spacing:-.015em}
+.mark .sub{font-size:.76rem;color:var(--ink-3);font-family:var(--font-m)}
+.asof{font-family:var(--font-m);font-size:.7rem;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);padding:3px 8px;border-radius:999px;white-space:nowrap}
+
+/* targets strip */
+.targets{background:var(--surface);border-bottom:1px solid var(--line)}
+.targets-in{padding-block:16px 18px}
+.strip-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.strip-h h2{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2);font-weight:600}
+.strip-h span{font-size:.74rem;color:var(--ink-3)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px 18px}
+.t{min-width:0}
+.t .lab{font-size:.72rem;color:var(--ink-2);display:block;margin-bottom:5px;line-height:1.3}
+.t .num{font-family:var(--font-m);font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600;display:flex;align-items:baseline;gap:4px}
+.t .num .of{font-size:.72rem;font-weight:400;color:var(--ink-3)}
+.bar{height:5px;background:var(--surface-2);border-radius:3px;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:3px}
+.bar.over i{background:var(--ok)}
+.bar.zero{box-shadow:inset 0 0 0 1px var(--line-strong)}
+.bar.unrep{background:repeating-linear-gradient(135deg,var(--surface-2),var(--surface-2) 3px,var(--line) 3px,var(--line) 4px)}
+.bar.ncomp{box-shadow:inset 0 0 0 1px var(--line-strong)}
+.bar.ncomp i{background:var(--idle);opacity:.5}
+.t .note{font-size:.68rem;color:var(--ink-3);margin-top:4px;display:block}
+.mstate{font-size:.58rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.basis{font-size:.66rem;color:var(--ink-3);margin-top:5px;display:block;line-height:1.4}
+.asof{font-family:var(--font-m)}
+.legend{display:flex;flex-wrap:wrap;gap:9px 18px;margin-bottom:14px}
+.lg{display:flex;align-items:center;gap:7px;font-size:.68rem;color:var(--ink-2)}
+.lgb{width:24px;height:5px;border-radius:3px;flex:none;background:var(--surface-2)}
+.tierdot{font-family:var(--font-m);font-size:.58rem;color:var(--ink-3);margin-right:4px}
+#tgrid .basis{display:none}
+#tgrid.rules .basis{display:block}
+.rulesbtn{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.68rem;color:var(--ink-2)}
+.rulesbtn[aria-pressed="true"]{border-color:var(--brand);color:var(--brand)}
+.ladder{display:flex;flex-direction:column;gap:1px;margin-top:8px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.rung{display:flex;align-items:baseline;gap:9px;padding:7px 11px;background:var(--surface-2);font-size:.78rem}
+.rung .tick{color:var(--line-strong);font-size:.7rem;flex:none}
+.rung.done{background:var(--ok-bg)}
+.rung.done .tick{color:var(--ok)}
+.rung .rname{flex:1;min-width:0;color:var(--ink)}
+.rung .rev{font-size:.68rem;color:var(--ink-3);text-align:right;max-width:52%}
+.rung.done .rev{color:var(--ok)}
+.scope{margin-top:14px;border:1px dashed var(--line-strong);border-radius:6px;padding:10px 13px}
+.scope b{display:block;font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin-bottom:4px;font-weight:600}
+.scope p{margin:0;font-size:.78rem;color:var(--ink-2);line-height:1.5}
+
+/* rail */
+.rail-band{background:var(--bg);border-bottom:1px solid var(--line)}
+.rail{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-block:14px}
+@media (max-width:860px){.rail{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:430px){.rail{grid-template-columns:1fr}}
+.ct{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:10px 11px 9px;display:flex;flex-direction:column;gap:7px;transition:border-color .12s,box-shadow .12s;min-width:0}
+.ct:hover{border-color:var(--line-strong)}
+.ct[aria-pressed="true"]{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.ct .cnum{font-family:var(--font-m);font-size:.66rem;color:var(--ink-3);letter-spacing:.04em}
+.ct .cname{font-family:var(--font-d);font-size:.82rem;font-weight:600;line-height:1.25;letter-spacing:-.005em}
+.ct[aria-pressed="true"] .cname{color:var(--brand)}
+.seg{display:flex;gap:2px;height:4px}
+.seg i{flex:1;border-radius:1px}
+.ct .cmeta{font-size:.66rem;color:var(--ink-3);font-family:var(--font-m)}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-block:14px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:.73rem;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip[aria-pressed="true"]{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.spacer{flex:1 1 40px}
+#q{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.78rem;color:var(--ink);min-width:0;width:190px;font-family:var(--font-b)}
+#q::placeholder{color:var(--ink-3)}
+
+/* detail */
+main{padding-block:6px 56px}
+.chead{border-top:2px solid var(--brand);padding-top:14px;margin-bottom:4px}
+.chead .ckicker{font-family:var(--font-m);font-size:.7rem;color:var(--brand);letter-spacing:.06em;font-weight:500}
+.chead h2{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin-top:3px;line-height:1.15}
+.chead p{color:var(--ink-2);font-size:.9rem;max-width:62ch;margin:8px 0 0}
+.fin{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.fin span{font-family:var(--font-m);font-size:.69rem;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:3px 8px;color:var(--ink-2)}
+
+.subs{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.sc{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sc.bat{border-left:3px solid var(--brand)}
+.sch{width:100%;background:none;border:0;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;text-align:left}
+.sch:hover{background:var(--surface-2)}
+.ref{font-family:var(--font-m);font-size:.72rem;color:var(--ink-3);flex:none;width:34px;padding-top:2px;font-variant-numeric:tabular-nums}
+.sch .mid{flex:1;min-width:0}
+.sch .st{font-family:var(--font-d);font-size:.92rem;font-weight:600;line-height:1.3;letter-spacing:-.005em}
+.sch .sl{font-size:.78rem;color:var(--ink-2);margin-top:3px;line-height:1.4}
+.pill{flex:none;font-size:.66rem;font-weight:600;padding:3px 9px;border-radius:999px;letter-spacing:.01em;white-space:nowrap;align-self:center}
+.caret{flex:none;color:var(--ink-3);font-size:.7rem;align-self:center;font-family:var(--font-m)}
+.scb{padding:2px 14px 16px;border-top:1px solid var(--line)}
+.scb .mand{background:var(--surface-2);border-left:2px solid var(--line-strong);padding:11px 13px;margin:14px 0;border-radius:0 5px 5px 0}
+.scb .mand b{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);margin-bottom:5px;font-weight:600}
+.scb .mand p{margin:0;font-size:.84rem;color:var(--ink);line-height:1.55}
+.ph{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);font-weight:600;margin:16px 0 7px}
+.scb ul{margin:0;padding-left:17px;display:flex;flex-direction:column;gap:6px}
+.scb li{font-size:.84rem;color:var(--ink);line-height:1.5}
+.scb li::marker{color:var(--brand)}
+.tbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px;margin-top:10px;background:var(--surface-2);border-radius:6px;padding:12px 14px}
+.src{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.src a{font-size:.72rem;font-family:var(--font-m);color:var(--brand);text-decoration:none;border:1px solid var(--line);background:var(--surface-2);border-radius:4px;padding:3px 8px}
+.src a:hover{border-color:var(--brand)}
+.gov{border-color:var(--brand)!important}
+.empty{color:var(--ink-3);font-size:.85rem;padding:28px 0;text-align:center}
+footer{border-top:1px solid var(--line);padding-block:18px 28px;color:var(--ink-3);font-size:.73rem;line-height:1.6}
+footer b{color:var(--ink-2);font-weight:600}
+</style>
+
+<header class="top"><div class="wrap top-in">
+  <div class="mark">
+    <h1>NCMM Component Tracker</h1>
+    <span class="sub">Ministry of Mines · FY 2024-25 to FY 2030-31</span>
+  </div>
+  <span class="asof">Record as at 25 Oct 2026</span>
+</div></header>
+
+<section class="targets"><div class="wrap targets-in">
+  <div class="strip-h"><h2>Mission output targets</h2><span>Table 2 of the mission document, against the latest published position</span><button type="button" class="rulesbtn" id="rulesbtn" aria-pressed="false">Counting rules</button></div>
+  <div class="legend" id="legend"></div>
+  <div class="tgrid" id="tgrid"></div>
+</div></section>
+
+<div class="rail-band"><div class="wrap"><div class="rail" id="rail"></div></div></div>
+
+<div class="wrap"><div class="controls" id="controls"></div></div>
+
+<main class="wrap" id="main"></main>
+
+<footer class="wrap">
+  <p><b>Status grades the instrument, not the outcome.</b> <b>Substantially delivered</b> means the thing the mission promised to create exists — a scheme notified, a rule amended, a forum launched. It does not mean the associated output target has been met, which is why a delivered sub-component can sit beside an empty progress bar. <b>Announced, not notified</b> marks instruments that exist in a minister's statement or a cabinet note but have no published scheme or guideline. <b>No public record</b> means nothing has been published against a written commitment; every such row carries the scope of what was searched and as of when, because absence of disclosure is not proof of inaction.</p>
+  <p><b>Numbers carry their own state.</b> A filled bar is a figure verified against a government source. An outlined empty bar is a confirmed none — the thing does not exist. A hatched bar is unreported, where no figure has been published either way, and it is never drawn as zero. A greyed bar marked <b>not comparable</b> means the figure and the target do not share a population or a counting rule, so the share shown is context rather than delivery. Each metric carries an as-of date, and <b>Counting rules</b> in the header reveals how every headline figure was derived. Where two government sources conflict, both are shown rather than one silently chosen.</p>
+  <p>Primary sources are the <a href="https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf" style="color:var(--brand)">NCMM mission document (January 2025)</a> and the <a href="https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf" style="color:var(--brand)">Ministry of Mines progress deck of 10 January 2026</a> and the <a href="https://mines.gov.in/admin/download/69945dabea1821771330987.pdf" style="color:var(--brand)">Ministry of Mines Annual Report 2025-26</a>, with the <a href="https://www.pib.gov.in/FactsheetDetails.aspx?id=150952&amp;NoteId=150952&amp;ModuleId=16&amp;reg=48&amp;lang=2" style="color:var(--brand)">PIB NCMM factsheet of 18 August 2026, updated 23 October 2026</a> taking precedence where the three conflict. Supplemented where no government disclosure exists. Government sources are outlined in the accent colour.</p>
+</footer>
+
+<script>
+const S={ok:["Substantially delivered","var(--ok)","var(--ok-bg)"],live:["Underway","var(--live)","var(--live-bg)"],ann:["Announced, not notified","var(--warn)","var(--warn-bg)"],idle:["Not started","var(--idle)","var(--idle-bg)"],none:["No public record","var(--none)","var(--none-bg)"]};
+
+/* Metric states — a value, what kind of value it is, when it was true, and how it was counted.
+   v verified · z confirmed zero · u unreported · n not comparable with the target */
+const MS={
+ v:["Verified","var(--ok)","var(--ok-bg)"],
+ z:["Confirmed none","var(--idle)","var(--idle-bg)"],
+ u:["Not reported","var(--warn)","var(--warn-bg)"],
+ n:["Not comparable","var(--live)","var(--live-bg)"]};
+
+const TARGETS=[
+ {l:"Domestic exploration projects",a:571,b:1200,s:"v",d:"23 Oct 2026",
+  r:"GSI 195 + 230 and NMEDT 62 + 84 across FY 2024-25 and FY 2025-26. A sum of annual government counts reported on differing bases; the mission does not define whether the target counts projects sanctioned, undertaken or completed."},
+ {l:"Critical mineral blocks auctioned",a:34,b:100,s:"v",d:"10 Jan 2026",
+  r:"Blocks auctioned since April 2024 under the mission. 59 have been auctioned in all across 12 states, a figure that includes pre-mission rounds and is not the mission metric."},
+ {l:"Foreign producing mines",a:0,b:50,s:"z",d:"23 Oct 2026",
+  r:"Mines in production. Five Argentine lithium blocks are held at exploration-and-development-rights stage, which does not meet the target's unit. Rights held is not zero; producing mines is."},
+ {l:"Material recycled",a:null,b:400,s:"u",d:"23 Oct 2026",
+  r:"Cumulative kt to FY 2030-31. No recycled-material output has been published. The 850 KTPA pledged by eligible applicants is capacity rather than output, and annual rather than cumulative, so it cannot fill this bar."},
+ {l:"Patents in the value chain",a:955,b:1000,s:"n",d:"Oct 2025",
+  r:"955 filed and 249 granted nationally across the critical mineral value chain, January to October 2025. No source attributes these to mission-funded research, so the ratio does not measure mission delivery."},
+ {l:"Skilled professionals",a:1000,b:10000,s:"v",d:"FY 2024-25",
+  r:"Over 1,000 skilled by GSI, NFTDC, ISM and IMMT in FY 2024-25. No FY 2025-26 figure has been published, so this is one year's flow, not a verified cumulative count."},
+ {l:"Mineral processing parks",a:0,b:4,s:"z",d:"23 Oct 2026",
+  r:"Parks commissioned. Four states are confirmed as supported with ₹500 crore, but no park has been notified, built or brought into operation."},
+ {l:"Centres of Excellence",a:9,b:3,s:"v",d:"FY 2025-26",
+  r:"Nine institutes recognised as Centres of Excellence under NCMM by the Ministry of Mines: four IITs, IISc and four R&D laboratories. Recognition against the target's unit, not demonstrated output."},
+ {l:"Mineral stockpiles",a:0,b:5,s:"z",d:"9 Oct 2026",
+  r:"Cumulative stockpiles established. The policy was described by the Mines Secretary as not yet finalised. The mission does not state whether the unit is minerals, facilities or arrangements."}];
+
+const G="gov";
+const D=[
+{id:"4.1",name:"Increasing Domestic Critical Minerals Production",
+ blurb:"The largest component by budget and by sub-component count. It covers the whole domestic chain from survey to processing park, and carries the mission's two headline numbers.",
+ fin:["NMET exploration ₹3,000 cr","GSI exploration ₹4,000 cr","Processing parks ₹500 cr","Pilot recovery projects ₹100 cr"],
+ subs:[
+ {r:"4.1.1",t:"Expanding Exploration and Mining activities",s:"live",b:1,
+  lead:"571 of 1,200 exploration projects and 34 of 100 blocks, on the latest government counts.",
+  m:"Government agencies are to undertake 1,200 exploration projects between FY 2024-25 and FY 2030-31, and more than 100 critical mineral blocks are to be auctioned by FY 2030-31. NMET expenditure is to be enhanced through public sector and notified private exploration agencies, with ₹3,000 crore allocated under NMET and ₹4,000 crore to be spent by the Geological Survey of India from its regular budget.",
+  p:["The exploration count has been revised upward. The PIB factsheet of 18 August 2026, updated 23 October 2026, reports NMEDT funding 62 critical and strategic projects in FY 2024-25 and 84 in FY 2025-26 — not the 36 carried in the January 2026 progress deck. With GSI at 195 and 230 for the two years, the comparable total is 571, not the 523 the deck reported.",
+     "The same factsheet records GSI completing 457 projects in Field Season 2025-26, of which 230 were on critical and strategic minerals. The 1,200 target counts critical mineral projects only.",
+     "The mission document does not state whether the 1,200 counts projects sanctioned, undertaken or completed, and GSI and NMEDT report on different bases. The total above is a sum of government-reported annual counts, not a reconciled series.",
+     "59 critical mineral blocks auctioned to date across 12 states, comprising 13 mining leases and 46 composite licences; 34 by the Centre and 25 by state governments. 23 blocks are currently under auction.",
+     "The eighth tranche of 20 blocks was launched on 15 July 2026 across nine states, covering rare earths, graphite, lithium, tungsten, gallium, titanium and molybdenum. Results have not been published.",
+     "Lithium is thin in the auctioned pool: one composite licence in Chhattisgarh and one combined lithium-and-REE block. Graphite dominates with 18 blocks across Madhya Pradesh, Odisha, Jharkhand, Arunachal Pradesh and others."],
+  g:[{a:571,b:1200,l:"Exploration projects",s:"v",d:"23 Oct 2026",r:"Sum of GSI and NMEDT annual counts for FY 2024-25 and FY 2025-26, reported on differing bases. The target does not define sanctioned, undertaken or completed."},
+     {a:34,b:100,l:"Blocks auctioned, mission period",s:"v",d:"10 Jan 2026",r:"Central auctions since April 2024. Separate from the 1,200 exploration target — an auction is neither exploration nor production."}],
+  src:[["PIB NCMM factsheet, upd. 23 Oct 2026","https://www.pib.gov.in/FactsheetDetails.aspx?id=150952&NoteId=150952&ModuleId=16&reg=48&lang=2",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G],["Eighth tranche, Jul 2026","https://www.business-standard.com/economy/news/centre-offers-20-critical-mineral-blocks-in-eighth-auction-tranche-126071501438_1.html",""]]},
+ {r:"4.1.2",t:"Mining in offshore areas",s:"live",b:1,
+  lead:"First tranche cancelled for lack of interest; a redesigned two-block attempt closes 28 December 2026.",
+  m:"The Offshore Areas Mineral (Development and Regulation) Amendment Act 2023, in force from 17 August 2023, introduced auction as the method of allocating operating rights offshore. Offshore blocks of polymetallic nodules and crusts containing cobalt, rare earths, nickel and manganese have been explored and put up for auction, and effort is to be enhanced to start offshore mineral production.",
+  p:["Tranche I was launched on 28 November 2024 with 13 blocks across the Arabian and Andaman Seas, seven of them polymetallic nodule and crust blocks in the West Sewell Ridge area off Great Nicobar.",
+     "The bid deadline was extended twice, from 27 February to 2 April and then 1 May 2025. The auction was cancelled in December 2025 for lack of interest.",
+     "A second attempt was notified on 1 October 2026 covering two enlarged Andaman Sea blocks — Sewell Rise-01 at 632 sq km and West Sewell Ridge-01 at 1,000 sq km — carrying nickel, cobalt, copper and manganese, offered as composite licences.",
+     "The minimum number of technically qualified bidders for a first-attempt auction was cut from three to two, and NMET has offered partial reimbursement of exploration expenses to composite licence holders. Bids close 28 December 2026."],
+  src:[["Second offshore attempt, Oct 2026","https://psuwatch.com/newsupdates/mines-ministry-pitches-larger-andaman-sea-seabed-blocks-to-bidders-in-second-offshore-auction-attempt",""],["Tranche I auction document","https://mines.gov.in/admin/download/677fa04bb9edc1736417355.pdf",G]]},
+ {r:"4.1.3",t:"Critical Minerals Regulatory Support Programme",s:"ok",b:0,
+  lead:"The most completely delivered commitment in the mission — four distinct clearance reforms are now in force.",
+  m:"To expedite the transition from exploration to mining operations, the government is to create a fast-track regulatory approval process for domestic critical minerals exploration and mining projects, given the strategic importance of the sector.",
+  p:["A separate window for critical mineral project clearances has been created on the PARIVESH portal.",
+     "The Van (Sanrakshan Evam Samvardhan) Rules 2023 were amended with effect from 31 August 2025 to allow compensatory afforestation over degraded forest land of at least double the extent for critical and strategic mineral mining, shortening forest clearance.",
+     "Critical mineral mining projects have been classified as projects of security and strategic importance, exempted from public hearing, and are now appraised at the Central level irrespective of lease area.",
+     "In December 2025 MoEFCC directed that joint surveys be conducted at the pre-auction or post-auction stage by teams drawn from the Revenue, Forest and Mining departments of the state concerned, to avoid duplication and reduce procedural delay.",
+     "Downstream of clearance, the Mineral (Auction) Rules 2015 were amended on 17 October 2025 to introduce intermediary timelines for fast-tracking operationalisation of auctioned mines. A target of operationalising 62 blocks in 2025-26 was set after a review on 4 April 2025 by the Principal Secretary to the Prime Minister and the Cabinet Secretary with the Chief Secretaries of ten mining states."],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.1.4",t:"Concession for Private Exploration",s:"live",b:0,
+  lead:"Two government totals are in circulation — 648 and 777 NMEDT projects — on different cutoffs.",
+  m:"The Exploration Licence has been introduced as a new concession to encourage private participation in exploration. The government will share the risk of licence holders through a notified scheme of partial funding of exploration expenses, with a similar scheme notified for composite licence holders, and will amend the scheme if required.",
+  p:["The National Mineral Exploration Trust has been renamed the National Mineral Exploration and Development Trust, its mandate widened beyond exploration to mine and mineral development within India, in offshore areas and overseas. The lessee's contribution has been raised from 2 to 3 per cent of royalty.",
+     "Two government totals exist and this tracker does not resolve them. The Annual Report 2025-26 states 648 projects approved since inception, of which 540 are mineral exploration. The PIB factsheet updated 23 October 2026 states 777 projects sanctioned worth ₹3,828.52 crore, of which 255 relate to critical minerals. The cutoffs and inclusion rules differ and neither document defines them, so both are shown rather than one substituted for the other.",
+     "On the private-agency figure the sources agree in shape: 112 projects worth ₹279.49 crore belong to 19 notified private exploration agencies.",
+     "A Project Sanctioning Committee chaired by the Director General, NMEDT can now approve projects up to ₹20 crore each, and Technical-cum-Cost Committee meetings are convened weekly to speed clearance.",
+     "In January to December 2025, 183 projects worth ₹687.55 crore were approved, of which 154 were mineral exploration projects worth ₹437.23 crore.",
+     "Forty blocks explored with NMEDT funding have been successfully auctioned, sixteen of them during 2025.",
+     "Partial reimbursement of exploration expenses was extended to composite licence holders in the second offshore tranche of October 2026."],
+  src:[["PIB NCMM factsheet, upd. 23 Oct 2026","https://www.pib.gov.in/FactsheetDetails.aspx?id=150952&NoteId=150952&ModuleId=16&reg=48&lang=2",G],["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G]]},
+ {r:"4.1.5",t:"Recovery from overburden, tailings, fly ash and red mud",s:"live",b:0,
+  lead:"One project sanctioned at ₹13.52 crore against ₹100 crore, with a tailings recovery policy promised.",
+  m:"Recovery of critical minerals from mine tailings is to be promoted using hydrometallurgy, solvent extraction, electrochemical, bio-hydrometallurgy and bioleaching processing as a low-cost secondary source. The regulatory regime will be relaxed to encourage recovery from overburden, tailings, fly ash, red mud and existing mines, a lower revenue share will be designed for critical minerals associated with major minerals, and ₹100 crore will be allocated for pilot projects through industry, academia and research collaboration.",
+  p:["Guidelines for funding pilot projects on recovery from overburden, tailings, fly ash and red mud were issued on 14 November 2025.",
+     "The single approved project is named in the Annual Report as Rare Earth Mineral(s) Separation from Multiple Feedstocks, sanctioned at ₹13.52 crore, with JNARDDC as project management agency.",
+     "₹100 crore is allocated from NMEDT, so roughly 14 per cent of the head is committed. No further projects have been reported.",
+     "A separate policy for recovery of critical minerals from tailings has been announced as forthcoming, which would move this sub-component from pilot funding to a standing instrument."],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.1.6",t:"Assessment of Trace Elements during Exploration",s:"none",b:0,
+  lead:"The SOP the mission promised has not been published.",
+  m:"Exploration and mining companies, government and private, are to investigate and assess all minor or associated minerals that may genetically co-exist with the major mineral being explored. Data is to be integrated with the National Geoscience Data Repository, already explored data and preserved rock core re-examined, and the NCMM with GSI and IBM is to prepare an SOP or guidelines to facilitate the assessment.",
+  p:["No SOP or guideline has been published as at October 2026, and the January 2026 progress deck does not report on this sub-component.",
+     "This matters more than its profile suggests: cobalt, nickel and PGE in India occur largely as associates of chromite and copper, so trace-element assessment is the route by which battery minerals would be found at all."],
+  ev:"Searched as at 25 October 2026: the NCMM mission document, the January 2026 progress deck, the Ministry of Mines Annual Report 2025-26 and the PIB NCMM factsheet. None reports an SOP or guideline under this head. GSI and IBM technical circulars were not exhaustively checked, so this is an absence of disclosure rather than proof that no guidance exists.",
+  src:[["NCMM mission document, Jan 2025","https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf",G]]},
+ {r:"4.1.7",t:"Formation of Mineral Processing Parks",s:"ann",b:1,
+    lead:"Four states now confirmed by government, with ₹500 crore allocated. No scheme notified, no park commissioned.",
+  m:"The government will create mineral processing parks to house mineral processing industries, using existing industrial parks where available. A scheme is to be prepared by the Ministry of Mines in consultation with the Ministry of Finance, with ₹500 crore allocated by FY 2030-31. R&D for beneficiation and processing, mineral reagents, electrolytes, catalysts and bleaching agents is to be fostered alongside.",
+  p:["The four states are now confirmed by government rather than by press report. The PIB factsheet updated 23 October 2026 states that Critical Mineral Processing Parks in Andhra Pradesh, Gujarat, Odisha and Maharashtra are being supported with ₹500 crore.",
+     "State governments were first asked to explore establishing parks within existing industrial regions, as recorded in the January 2026 progress deck. The four states were settled after a review meeting on 22 April 2026.",
+     "Mines Secretary Keshav Chandra confirmed on 13 August 2026 that each park will be built around a single element rather than a mix, with lithium and nickel taken up first.",
+     "The Odisha park is to sit inside the Petroleum, Chemicals and Petrochemicals Investment Region at Paradip, per Minister of State Satish Chandra Dubey's statement to Parliament.",
+     "Reporting of the September 2026 remarks maps Maharashtra to lithium, Odisha to nickel, and Gujarat and Andhra Pradesh to rare earths. Treat this as indicative until notified.",
+     "State support is confirmed. Scheme notification, site selection, funds released, construction and commissioning are five further stages, and none of them is evidenced. No scheme or guidelines against the ₹500 crore have been published."],
+  st:[["States identified",true,"PIB factsheet, 23 Oct 2026"],["Scheme notified",false,""],["Sites selected",false,""],["Funds sanctioned or released",false,""],["Construction commenced",false,""],["Park operational",false,""]],
+  g:[{a:0,b:4,l:"Parks commissioned",s:"z",d:"23 Oct 2026",r:"Parks in operation. Four states confirmed as supported with ₹500 crore, which is the first of six stages."}],
+  src:[["PIB NCMM factsheet, upd. 23 Oct 2026","https://www.pib.gov.in/FactsheetDetails.aspx?id=150952&NoteId=150952&ModuleId=16&reg=48&lang=2",G],["Mines Secretary on park design, Aug 2026","https://psuwatch.com/newsupdates/each-critical-mineral-park-to-be-built-around-a-single-element-lithium-and-nickel-first-mines-secretary",""],["State-element mapping, Sep 2026","https://thatsmyev.com/news/india-lithium-nickel-processing-incentive-scheme-ev-battery",""]]},
+ {r:"4.1.8",t:"Role of State Governments",s:"live",b:0,
+  lead:"States have auctioned 25 of the 59 blocks and now carry planning responsibility for the processing parks.",
+  m:"States are to be encouraged to expedite statutory clearances for critical minerals exploration and mining, to promote exploration, mining, processing and R&D through mission and infrastructure support, and state public sector undertakings are to be encouraged to acquire mineral assets abroad or invest alongside central PSUs.",
+  p:["25 of the 59 critical mineral blocks auctioned to date were auctioned by state governments.",
+     "Gujarat, Maharashtra, Andhra Pradesh and Odisha are hosting the four processing parks, with planning responsibility resting with the states and the Centre providing technical support.",
+     "No state PSU has been reported as acquiring or investing in an overseas critical mineral asset."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]}]},
+
+{id:"4.2",name:"Acquisition of Critical Mineral Assets Abroad",
+ blurb:"The component with the largest expected capital — ₹18,000 crore from PSUs on top of ₹5,600 crore of NMET support. No binding supply has yet been secured.",
+ fin:["Risk coverage for foreign sourcing ₹4,000 cr","Exploration outside India ₹1,600 cr","Expected PSU investment ₹18,000 cr"],
+ subs:[
+ {r:"4.2.1",t:"Mapping and Acquisition of Significant Assets",s:"live",b:1,
+  lead:"Five Argentine lithium blocks held; feasibility targeted December 2027, production end-2029.",
+  m:"The mission will extend support for mapping and detailed exploration of critical mineral assets in resource-rich countries through the Geological Survey of India, PSUs or other Indian entities, with the objective of supplying minerals to India. NMET is expected to spend ₹1,600 crore up to FY 2030-31 to support critical minerals exploration activities outside India.",
+  p:["The MMDR Act was amended in August 2025 to widen the scope of the NMEDT so that it can support critical mineral exploration and mining in other countries.",
+     "KABIL holds exploration and development rights over five brine-type lithium blocks in Catamarca, Argentina, covering 15,703 hectares under the January 2024 agreement with CAMYEN SE.",
+     "The first phase of non-invasive exploration was completed in July 2025 and preparatory work for detailed exploration is under way. A feasibility study is targeted for December 2027 and production for end-2029 — both projections, not committed milestones, and both inside the mission period, which runs to March 2031.",
+     "Exploration and development rights are not a producing mine. Nothing in these blocks counts toward the mission's target of 50 foreign mines until production begins."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.2.2",t:"PSUs and private companies in Overseas Acquisition",s:"live",b:1,
+  lead:"A six-PSU group is evaluating bids weekly, but none of the 50 foreign mines has been secured.",
+  m:"The government will motivate central PSUs and encourage private sector companies to allocate funds for acquiring critical mineral assets overseas. The Empowered Committee will give broad directions and inter-ministerial support, PSUs and their joint ventures will be empowered to invest abroad through guidelines, and PSUs are expected to invest around ₹2,500 crore a year, cumulatively ₹18,000 crore by FY 2030-31.",
+  p:["KABIL, with Coal India, Oil India, ONGC Videsh, NLC India, SCCL and Bharat Petro Resources, is jointly evaluating projects for potential bidding in resource-rich countries.",
+     "A group of PSUs meets weekly on overseas opportunities, with fortnightly review under the chairmanship of the Secretary (Mines).",
+     "Under the March 2022 MoU with Australia's Critical Minerals Office, detailed due diligence is complete on five lithium projects and a non-binding offer has been submitted by a consortium of Indian PSUs.",
+     "A Mali lithium project is on hold on socio-political grounds, and discussions with Chile's ENAMI are at non-disclosure stage. No binding physical supply has been secured from any overseas asset."],
+  st:[["Exploration rights acquired",true,"5 blocks, Catamarca, Argentina"],["Detailed exploration under way",true,"preparatory work, Jul 2025"],["Feasibility completed",false,"targeted Dec 2027"],["Development or equity acquisition",false,""],["Mine in production",false,"projected end-2029"]],
+  g:[{a:0,b:50,l:"Foreign producing mines",s:"z",d:"23 Oct 2026",r:"Mines in production, the unit the mission's target uses. Rights held and projects under due diligence are real activity but do not meet this unit; the ladder above shows where they sit."}],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G],["KABIL overseas programme","https://www.tribuneindia.com/news/business/kabil-steps-up-overseas-exploration-begins-lithium-project-in-argentina-ceo/",""]]},
+ {r:"4.2.3",t:"PSU-led Acquisitions with Private Sector Collaboration",s:"live",b:1,
+  lead:"Altmin's Brazil lithium refinery project is now on the Minerals Security Partnership list — the only named instance.",
+  m:"The government will facilitate central PSUs in leading asset acquisitions in association with private companies contributing capital and sharing revenue. Equity participation by PSUs can provide financial support while sharing risk, with offtake agreements securing supply to Indian manufacturing. Private companies may go solo or form joint ventures with PSUs.",
+  p:["The Annual Report 2025-26 names the project: the Ministry of Mines recommended an Indian project by Altmin Pvt. Ltd. for setting up a lithium refinery in Brazil to the Minerals Security Partnership, and it has been included in the MSP project list.",
+     "MSP shared a list of 40 projects with members in November 2025. India secured one place on it.",
+     "The two government sources describe the project differently. The January 2026 progress deck records a lithium project in Brazil together with a refinery in India; the Annual Report records a lithium refinery in Brazil. The distinction matters, since only the first adds conversion capacity inside India.",
+     "No equity structure, offtake arrangement or Indian partner has been disclosed."],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.2.4",t:"Encouraging Private Companies through Financial Support",s:"live",b:0,
+  lead:"A working group under Secretary (MoPNG) is now drafting the scheme; ₹4,000 crore remains undeployed.",
+  m:"To increase the supply of critical minerals to India, the government will provide targeted subsidies for mining and for setting up evacuation infrastructure to lower investment risk. ₹4,000 crore will be allocated for such projects up to FY 2030-31 from NMET, and the mission will formulate a detailed scheme under which companies can avail subsidies.",
+  p:["The first meeting of the NCMM Empowered Committee, chaired by the Cabinet Secretary, was held on 11 September 2025. On its recommendation a working group headed by the Secretary, Ministry of Petroleum and Natural Gas, was constituted to formulate strategies and procedures for supporting the private sector in acquiring critical mineral assets.",
+     "The working group met on 3 October 2025 and again on 17 October 2025, the second meeting with Oil India, ONGC Videsh, BPCL, Coal India, KABIL and EXIM Bank, to examine case studies and models for overseas asset acquisition.",
+     "The ₹4,000 crore sits in the mission's financial outlay as risk coverage for foreign sourcing and remains undeployed. The mission's January 2026 way-forward still lists the supporting schemes, including risk mitigation, as pending.",
+     "De-risking is being pursued through multilateral instruments including the World Bank's MIGA and the ADB, with financing discussions under way with IIFCL, NIIF and EXIM Bank.",
+     "The body that will draft the instrument now exists and has met twice. The instrument itself does not."],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.2.5",t:"Infrastructure Support",s:"none",b:0,
+  lead:"No published engagement on mineral evacuation infrastructure.",
+  m:"The Ministry of Mines will work closely with the Ministry of External Affairs to engage with regulators in the resource country to support the development of mineral evacuation infrastructure.",
+  p:["No dedicated NCMM evacuation-infrastructure measure was identified in the sources reviewed. Neither the January 2026 progress deck nor the Annual Report 2025-26 reports on this sub-component.",
+     "Bilateral engagement with resource countries is extensive and recorded under 4.4.1, but none of it is described as directed at evacuation infrastructure."],
+  ev:"Searched as at 25 October 2026: the NCMM mission document, the January 2026 progress deck, the Annual Report 2025-26 and the PIB NCMM factsheet. Infrastructure built under other ministries or under bilateral programmes would not necessarily appear in these sources.",
+  src:[["NCMM mission document, Jan 2025","https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf",G]]}]},
+
+{id:"4.3",name:"Recycling of Critical Minerals",
+ blurb:"The only component where an instrument has been designed, notified, applied for and closed. It is also where the gap between pledged capacity and actual recovery is widest.",
+ fin:["Recycling incentive scheme ₹1,500 cr"],
+ subs:[
+ {r:"4.3.1",t:"Guidelines and SOPs for Recycling",s:"ann",b:1,
+  lead:"The SOP machinery exists and is running — for non-ferrous metal scrap, not for battery minerals.",
+  m:"Separate guidelines and SOPs are to be formulated for recycling of critical minerals, to streamline the informal mineral recycling sector. Best practices from the Extended Producer Responsibility norms for plastics and e-waste are to inform the design, and the NCMM will support EPR regulations through analytical studies and the development of innovative solutions to secure the critical minerals supply chain.",
+  p:["No NCMM-specific recycling guideline or SOP for critical minerals has been published. For batteries the mission relies on the EPR framework under the Battery Waste Management Rules 2022, administered by MoEFCC and CPCB, and the January 2026 progress deck sources its recovery figures directly from the CPCB battery EPR dashboard.",
+     "The institutional template this sub-component describes does exist, one sector over. JNARDDC acts as the Metal Recycling Authority under the National Non-Ferrous Metal Scrap Recycling Framework 2020 and as the EPR agency for aluminium scrap.",
+     "Under that mandate JNARDDC launched the Non-Ferrous Metal Recycling Website and Stakeholders' Portal on 7 May 2025, with over 600 recycling industries registered, and is establishing a Centre of Excellence for Non-Ferrous Metal Recycling.",
+     "Draft guideline documents under stakeholder consultation cover process standards for scrap recycling products, minimum infrastructure requirements for recycling units, and a mechanism for ranking and evaluating units in coordination with MoEFCC. A circular economy vision document for non-ferrous metals is being prepared with PwC.",
+     "None of this extends to lithium-ion or to the critical minerals the mission names. The informal sector this sub-component exists to formalise remains outside both the battery EPR regime and the non-ferrous framework."],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["CPCB battery EPR dashboard","https://eprbattery.cpcb.gov.in/user/nationaldashboard",G]]},
+ {r:"4.3.2",t:"Incentive scheme for Recycling of Critical Minerals",s:"ok",b:1,
+  lead:"Scheme notified and 58 entities found eligible; 850 KTPA pledged, none of it yet built or disbursed against.",
+  m:"An incentive scheme for setting up mineral recycling clusters is to be prepared by the Ministry of Mines in consultation with the Ministry of Finance, identifying medium and long-term targets for recycled mineral production and distributing incentives accordingly. The quantum is pegged at ₹1,500 crore. The scheme covers lithium, nickel, cobalt, graphite, PGE, rare earths, antimony, cadmium, gallium, germanium, indium, molybdenum, selenium, silicon, strontium, tellurium, tin, titanium, tungsten, vanadium and zirconium.",
+  p:["The Union Cabinet approved the ₹1,500 crore scheme on 3 September 2025; it was rolled out on 2 October 2025 and applications closed on 1 April 2026.",
+     "Structure: a 20 per cent capex subsidy on plant, machinery, equipment and associated utilities, plus an opex subsidy on incremental sales over the FY 2025-26 base, capped at ₹50 crore for large entities and ₹25 crore for small entities.",
+     "58 companies were found eligible — 20 on 30 March 2026 and a further 38 at the Executive Committee meeting of 29 April 2026 — pledging approximately ₹5,000 crore of investment and roughly 850 KTPA of capacity, against the scheme's stated capacity target of 270 KTPA and 40 KT of critical minerals recovered annually.",
+     "Three different quantities are in play and should not be read against each other. The 400 kt in the mission's output table is cumulative material recycled to FY 2030-31. The 270 KTPA is the scheme's annual capacity target. The 850 KTPA is aggregate capacity pledged by applicants, not capacity built or operating. No incentive has been disbursed, and the government's April 2026 release describes project execution and commencement of production as the next stage.",
+     "Eligible feedstock is specified as e-waste, lithium-ion battery scrap, and scrap other than e-waste and LIB scrap, such as catalytic converters from end-of-life vehicles.",
+     "JNARDDC is the project management agency. The company-wise list has not been released, so the lithium-ion share of the 850 KTPA is unknown. Two firms have disclosed their own selection: Recyclekaro, committing about ₹300 crore to reach roughly 50,000 MT of processing capacity, and LICO Materials, committing ₹240 crore in Karnataka to add 10,000 TPA of hydrometallurgical extraction to 25,000 TPA of mechanical capacity, producing battery-grade lithium, nickel and cobalt at 99 per cent purity.",
+     "Set against this, the mission's own figure for FY 2024-25 recovery, drawn from the CPCB battery EPR dashboard, was lithium 200 tonnes, nickel 297 tonnes, cobalt 1,117 tonnes and cadmium 10.8 tonnes."],
+  st:[["Scheme notified",true,"2 Oct 2025"],["Applications closed",true,"1 Apr 2026"],["Entities found eligible",true,"58, by 29 Apr 2026"],["Projects under execution",false,"named as the next stage"],["Capacity commissioned",false,""],["Mineral recovery verified",false,""],["Incentive disbursed",false,""]],
+  g:[{a:null,b:400,l:"Material recycled, cumulative kt",s:"u",d:"23 Oct 2026",r:"No recycled-material output has been published. The 850 KTPA pledged is capacity, annual and unbuilt; the scheme's own capacity target is 270 KTPA. None of the three can substitute for this figure."},
+     {a:null,b:1500,l:"Incentive disbursed, ₹ crore",s:"u",d:"23 Oct 2026",r:"No disbursement figure has been published. Eligibility is not sanction, and sanction is not payment."}],
+  src:[["PIB: 58 companies cleared, Apr 2026","https://www.pib.gov.in/PressReleasePage.aspx?PRID=2256977&reg=3&lang=1",G],["Cabinet approval note, Sep 2025","https://mines.gov.in/admin/storage/ckeditor/Cabinet_approves_Rs_1756918678.pdf",G],["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["LICO Materials selection, May 2026","https://www.pv-magazine-india.com/2026/05/07/lico-materials-wins-government-incentives-for-critical-mineral-recycling/",""],["Recyclekaro selection, Apr 2026","https://www.pv-magazine-india.com/press-releases/recyclekaro-gets-government-backing-for-high-impact-critical-mineral-recycling-project/",""]]},
+ {r:"4.3.3",t:"Recycling Advisory Group",s:"none",b:1,
+  lead:"No advisory group constituted.",
+  m:"A Recycling Advisory Group is to be formed to assess the presence of different critical minerals in domestic and imported products and to suggest necessary measures for optimum recovery of critical minerals from these products.",
+  p:["No Recycling Advisory Group has been constituted or notified as at October 2026.",
+     "The function it describes — assessing which critical minerals sit inside which products — is precisely what the mission would need in order to set recycled-content or recovery targets with any precision."],
+  ev:"Searched as at 25 October 2026: the NCMM mission document, the January 2026 progress deck, the Annual Report 2025-26, the PIB NCMM factsheet and the recycling scheme guidelines. No constitution order or membership has been published. A group constituted without a public order would not appear here.",
+  src:[["NCMM mission document, Jan 2025","https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf",G]]}]},
+
+{id:"4.4",name:"Trade and Markets",
+ blurb:"Where the mission has moved fastest on paper, through customs relief delivered in two consecutive budgets, and slowest on the one instrument with a line item behind it.",
+ fin:["Stockpiling ₹500 cr"],
+ subs:[
+ {r:"4.4.1",t:"Enhance Trade with Resource-Endowed Countries",s:"live",b:0,
+  lead:"Multilateral memberships secured; no Critical Minerals Partnership Agreement concluded.",
+  m:"Engagement with resource-rich countries on trade and investment across critical mineral value chains is to be increased to ensure long-term security and sustainability. The government will aim to enter into Critical Minerals Partnership Agreements with resource-rich countries and to include critical minerals chapters in existing bilateral and free trade agreements.",
+  p:["An Indian project has been included in the Minerals Security Partnership.",
+     "Bilateral engagement is under way with Australia, Argentina and Chile, alongside the Quad Critical Minerals Initiative and the India-US MoU of October 2024.",
+     "Capacity-building programmes are being offered to resource-rich countries through GSI, MECL, IBM and Indian institutes.",
+     "No Critical Minerals Partnership Agreement has been signed, and no critical minerals chapter in a concluded FTA has been published."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.4.2",t:"Harmonise Tariffs through Bilateral FTAs",s:"none",b:0,
+  lead:"Tied to the WCO's 2027 HS revision; nothing published yet.",
+  m:"Bilateral free trade agreements can address harmonising tariff structures to facilitate ease of trade. The government is to actively engage with stakeholders on revising critical-minerals-relevant Harmonised System codes in line with the World Customs Organisation's tentative HS code revision in 2027.",
+  p:["No stakeholder consultation or Indian position on the HS revision has been published.",
+     "The WCO revision is scheduled for 2027, so this is a future milestone rather than a missed one. It is listed here as not evidenced, not as overdue."],
+  ev:"Searched as at 25 October 2026: Ministry of Mines sources above. India's position before the World Customs Organisation, and critical minerals chapters in FTAs under negotiation, are handled by the Department of Commerce and would not necessarily surface in mission reporting.",
+  src:[["NCMM mission document, Jan 2025","https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf",G]]},
+ {r:"4.4.3",t:"Eliminate Import Duty on Critical Minerals",s:"ok",b:1,
+  lead:"Relief delivered across three successive Budgets, now extending to processing capital goods.",
+  m:"The government has eliminated import duty on critical minerals based on strategic requirements, to ease the flow of these resources into the country, reduce the financial burden on domestic industries, attract foreign investment and stimulate downstream industries. Import duty on critical minerals will be reviewed periodically against strategic requirement.",
+  p:["Budget 2024-25 eliminated customs duties on 25 minerals and reduced basic customs duty on two further minerals.",
+     "Budget 2025-26 extended exemption to cobalt powder and waste, lithium-ion battery scrap, lead, zinc and twelve additional critical minerals.",
+     "Budget 2026-27 went further, exempting basic customs duty on imported capital goods for critical mineral processing, previously 7.5 per cent, taking monazite to zero, and removing duty on lithium battery cell machinery. The PIB factsheet records relief across three successive Budgets.",
+     "This is the mission's most complete delivery against a written commitment, achieved through the Finance Ministry rather than through any mission instrument. It does not follow that every critical mineral or product form is now duty-free; the commitment is to periodic review against strategic requirement."],
+  src:[["PIB NCMM factsheet, upd. 23 Oct 2026","https://www.pib.gov.in/FactsheetDetails.aspx?id=150952&NoteId=150952&ModuleId=16&reg=48&lang=2",G],["Budget 2026-27 critical mineral measures","https://www.business-standard.com/budget/news/budget-2026-india-rare-earth-corridors-critical-mineral-duty-exemption-126020101242_1.html",""]]},
+ {r:"4.4.4",t:"Removal of Barriers on Recyclable Materials",s:"ok",b:1,
+  lead:"Customs barriers removed at the border while domestic rules tightened on black mass — the two pull against each other.",
+  m:"To encourage the growth of the recycling industry and attract companies into processing and value addition, import duties and other barriers on recyclable materials such as scrap, black mass and e-waste are to be removed. This is to ensure a steady supply of raw materials for recycling, while the government takes measures to address any influx of unwanted e-waste and maintains environmental standards.",
+  p:["Budget 2025-26 exempted lithium-ion battery scrap and cobalt powder and waste from basic customs duty, delivering the import side of this commitment.",
+     "The domestic counter-current is the reclassification of black mass as hazardous waste under the Battery Waste Management (Amendment) Rules 2025, which tightens movement and handling rather than easing it.",
+     "The two instruments sit in different ministries and have not been reconciled in any published document. For a recycler, feedstock is now cheaper to import and harder to move once it is here."],
+  src:[["BWM Amendment Rules 2025","https://eprbattery.cpcb.gov.in/upload/adminDoc/Battery_Waste_Management_(Amendment)_Rules,_2025.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.4.5",t:"Develop National Critical Minerals Stockpile",s:"ann",b:1,
+  lead:"Policy described as weeks away on 9 October 2026; none of the five stockpiles established.",
+  m:"Essential critical minerals are to be identified and mechanisms established for timely activation of the stockpile, coordinated between industry stakeholders and government agencies. A joint initiative between central PSUs and private companies is to be institutionalised as a National Critical Mineral Stockpile Programme to guard against supply disruptions. ₹500 crore is allocated during the mission period, with guidelines to be prepared in consultation with the Ministry of Finance.",
+  p:["Mines Secretary Keshav Chandra said at the Assocham India Mines and Minerals Conclave on 9 October 2026 that the stockpiling policy was close to finalisation and would be announced within about a month, covering strategic sectors including defence, aerospace and energy.",
+     "Which minerals the stockpile will cover has not been stated. No quantities, holding agency or activation mechanism has been published.",
+     "Against a mission target of five cumulative stockpiles by FY 2030-31, none has been established and no guidelines have been issued."],
+  st:[["Minerals prioritised",false,""],["Policy approved",false,"described as weeks away, 9 Oct 2026"],["Guidelines issued",false,""],["Quantity procured",false,""],["Stockpile operational",false,""]],
+  g:[{a:0,b:5,l:"Stockpiles established",s:"z",d:"9 Oct 2026",r:"Cumulative stockpiles. The mission does not define whether the unit is five minerals, five facilities or five arrangements, so the denominator is taken as published."}],
+  src:[["Mines Secretary on stockpiling, Oct 2026","https://psuwatch.com/amp/story/newsupdates/govt-likely-to-announce-policy-on-critical-minerals-stockpiling-in-a-month-mines-secretary",""]]}]},
+
+{id:"4.5",name:"Scientific Research and Technological Advancement",
+ blurb:"The only component to have exceeded a mission target, with nine Centres of Excellence against a target of three. Patent filings are close to the seven-year target in the first ten months; grants are a quarter of the way.",
+ fin:["Domestic R&D and HRD ₹500 cr","International R&D support ₹500 cr"],
+ subs:[
+ {r:"4.5.1",t:"Promoting Research and Innovation",s:"live",b:1,
+  lead:"955 patents filed and 249 granted in ten months; ₹210 crore research programme opened January 2026.",
+  m:"Deployment of state-of-the-art extraction, processing and recycling technologies is to be supported by leveraging domestic R&D infrastructure and existing commercial solutions. The government will support patent filing by innovators, start-ups and enablers, improve coordination among CSIR, the IITs and IISc, and allocate ₹500 crore till FY 2030-31 for promoting domestic R&D, funded through the Anusandhan National Research Foundation.",
+  p:["The ₹210 crore ANRF-MAHA CRM Research Programme opened its application portal on 7 January 2026.",
+     "Funding is being extended to institutions, laboratories, start-ups and MSMEs working on critical minerals.",
+     "NFTDC has provided technology for rare earth permanent magnet manufacturing in India — relevant to EV motors rather than to cells, and one of the few concrete technology transfers the mission can point to.",
+     "From January to October 2025, 955 patents were filed and 249 granted in India across the critical mineral value chain. These are national counts for the value chain as a whole. No source attributes them to mission-funded research, so they should not be read as mission delivery against the 1,000 target, which the mission document does not define as filings or grants.",
+     "ANRF has identified Critical Raw Materials as a research priority area under its Mission for Advancement in High Impact Areas, with the ₹210 crore channelled to the nine recognised Centres of Excellence on a hub-and-spoke basis."],
+  g:[{a:955,b:1000,l:"Patent filings, national value chain",s:"n",d:"Oct 2025",r:"National filings across the critical mineral value chain, January to October 2025. Not attributed to mission-funded research by any source, so the share shown is context, not delivery."},
+     {a:249,b:1000,l:"Patents granted, national value chain",s:"n",d:"Oct 2025",r:"National grants over the same period. Filing and grant are different stages; the mission target specifies neither."}],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.5.2",t:"Establishing Centres of Excellence",s:"ok",b:0,
+  lead:"Nine centres linked with industry against a target of three.",
+  m:"Centres of Excellence on critical minerals are to be constituted on a hub-and-spoke model with institutions, organisations and research laboratories working on critical minerals. They will work on the critical minerals value chain and synergise R&D and innovation with national objectives, using the existing infrastructure and manpower of these organisations, with project manpower hired on contract if needed.",
+  p:["The Ministry of Mines has recognised nine institutes as Centres of Excellence under NCMM against a mission target of three: four IITs, the Indian Institute of Science, and four R&D laboratories.",
+     "Two are identified in the record. JNARDDC serves as a Spoke to IIT Hyderabad and IISc Bangalore, confirming the hub-and-spoke design is operating rather than only declared.",
+     "The remaining seven have not been named individually, and no centre's mandate or output has been published, so the target is met in count rather than demonstrated in result."],
+  g:[{a:9,b:3,l:"Centres of Excellence recognised",s:"v",d:"FY 2025-26",r:"Nine institutes recognised as CoEs under NCMM by the Ministry of Mines, which is the same programme and unit as the target of three. Recognition is verified; operation and output are not reported."}],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.5.3",t:"Supportive Mechanisms and Regulatory Simplification",s:"live",b:0,
+  lead:"Delivered indirectly through the clearances reforms and customs relief, not as its own instrument.",
+  m:"The government will simplify regulations and enhance collaboration with technology laboratories and academia to bolster local capabilities. Supportive mechanisms will be developed to overcome challenges such as lead times for technology acquisition, import duties and skilled workforce requirements.",
+  p:["The substance of this commitment has been met through other sub-components: the PARIVESH window and forest clearance amendments under 4.1.3, and the customs exemptions under 4.4.3.",
+     "No separate mechanism addressing technology acquisition lead times has been published."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.5.4",t:"Global Collaboration on R&D",s:"live",b:0,
+  lead:"Technical assistance is being received from the World Bank and ADB; no instrument or amount published.",
+  m:"India will leverage technical advancements made by other countries and companies by working with them on technology R&D, especially in mineral processing. ₹500 crore is earmarked from ANRF and other eligible R&D schemes to focus on global R&D collaboration across the critical minerals value chain, with periodic industry-specific need analyses.",
+  p:["The Annual Report 2025-26 states that technical assistance is being received from the World Bank and the Asian Development Bank to support mission activities. The January 2026 progress deck uses the word grant; the Annual Report does not, and neither names an instrument, an amount, a recipient or a disbursement.",
+     "₹500 crore is allocated under the International R&D Support head. No collaborative R&D project has been named."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]}]},
+
+{id:"4.6",name:"Human Resource Development",
+ blurb:"One tenth of the way to the skilling target, with the degree-programme deadline of 2026 arriving without a published module.",
+ fin:["Skill development centres ₹100 cr"],
+ subs:[
+ {r:"4.6.1",t:"Promoting Expertise and Skilled Workforce",s:"live",b:0,
+  lead:"Over 1,000 people skilled in FY 2024-25 against a mission target of 10,000.",
+  m:"Skill Development Centres are to be established with an allocation of ₹100 crore till FY 2030-31, to build a workforce capable of participating across exploration, mining, processing and recycling. Scientific research institutes, universities, research centres and the private sector are to be encouraged to support PhD and Masters programmes, with guidelines prepared in consultation with the Ministry of Finance and the Ministry of Skill Development and Entrepreneurship, alongside continuous upskilling for those already in the value chain.",
+  p:["More than 1,000 people were skilled in critical-mineral-related fields in FY 2024-25 by GSI, NFTDC, ISM and IMMT.",
+     "₹100 crore is earmarked. No skill development centre has been reported as established, and no FY 2025-26 figure has been published."],
+  g:[{a:1000,b:10000,l:"Skilled professionals",s:"v",d:"FY 2024-25",r:"Over 1,000 skilled by GSI, NFTDC, ISM and IMMT in FY 2024-25. One year's flow against a seven-year cumulative target. No FY 2025-26 figure published, and no de-duplication across programmes is described."}],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.6.2",t:"Targeted Degree Programs, Scholarships and Internships",s:"none",b:0,
+  lead:"The 2026 milestone is due this year; no module has surfaced publicly as at 25 October 2026.",
+  m:"In collaboration with universities and technical institutions, the government will develop and introduce specialised modules by 2026 focused on sustainable consumption and production of critical minerals, to be incorporated into existing mining, metallurgy and recycling technology degree programmes.",
+  p:["The commitment is to introduce specialised modules by 2026. The calendar year has not ended, so the milestone is due rather than missed.",
+     "No publicly accessible specialised module was identified in the sources reviewed as at 25 October 2026, and neither the Annual Report 2025-26 nor the January 2026 progress deck reports on this sub-component.",
+     "The module commitment is distinct from the scholarship and internship commitments in the same sub-component, on which nothing has been published either."],
+  ev:"Searched as at 25 October 2026: Ministry of Mines sources above. University and AICTE curriculum notifications were not exhaustively checked, and a module introduced at institutional level would not necessarily appear in mission reporting.",
+  src:[["NCMM mission document, Jan 2025","https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf",G]]},
+ {r:"4.6.3",t:"Capacity Building for Resource-Endowed Countries",s:"live",b:0,
+  lead:"Programmes running through GSI, MECL and IBM; no participant numbers published.",
+  m:"The government will offer capacity building programmes to resource-rich countries through GSI, MECL, IBM and Indian institutes and universities, enhancing the capacities of those nations while creating a stable supply of critical minerals for India.",
+  p:["Capacity-building programmes are being offered through GSI, MECL, IBM and Indian institutes and universities, per the January 2026 progress deck.",
+     "No participating country, programme or participant count has been published."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]}]},
+
+{id:"4.7",name:"Concurrent Initiatives",
+ blurb:"Three cross-cutting commitments. The traceability system, which would connect the mission to the battery EPR regime, has not begun.",
+ fin:[],
+ subs:[
+ {r:"4.7.1",t:"Updating the Critical and Strategic Minerals List",s:"live",b:1,
+  lead:"List unchanged since 2023, but demand and resource assessments were published in January 2026.",
+  m:"The government will periodically refine the criticality assessment framework based on supply risk and economic importance and update the list of critical minerals for India. Long-term risks such as price and demand fluctuations due to the evolving technology landscape are to be prioritised, with the Ministry of Mines working with entities such as NITI Aayog and providing time-bound approvals, alongside periodic demand assessments.",
+  p:["The list of 30 critical minerals was released in June 2023, and 24 were added to Part D of the First Schedule of the MMDR Act. The list itself has not been revised since.",
+     "The January 2026 deck publishes domestic demand projections to 2030: lithium 60-70 KTPA, nickel 100-110 KTPA, graphite 387-400 KT, cobalt 10-15 KT and rare earths about 4 KT.",
+     "It also publishes resources as at 1 April 2025, including lithium 12,900 KT, nickel 192,100 KT, cobalt 45,710 KT and graphite 301,500 KT of ore-bearing resource.",
+     "The deck states that lithium, nickel, cobalt and cadmium are currently produced in India only through recycling, not mining — which places the recycling component, not exploration, at the head of the battery mineral chain today."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.7.2",t:"Development of a Traceability System",s:"none",b:1,
+  lead:"Not begun. The nearest live instrument sits under a different ministry.",
+  m:"The government will aim to develop a Critical Mineral Traceability system to enhance tracking and monitoring of critical minerals in India, offering transparent information on critical minerals' composition and related information in products, with the broader aim of empowering consumers to make informed decisions on critical-mineral-intensive products.",
+  p:["No traceability system has been published, piloted or tendered.",
+     "The closest operating instrument is the EPR portal under the Battery Waste Management Rules, which tracks waste battery flows and EPR certificates rather than mineral composition in products.",
+     "Digital battery passport provisions have appeared in state EV policies, notably Maharashtra's, ahead of any central traceability framework."],
+  ev:"Searched as at 25 October 2026: Ministry of Mines sources above. Mineral traceability, battery identity and recycling chain-of-custody are three different systems; the absence of the first does not mean the others are absent, and the CPCB EPR portal performs part of the third.",
+  src:[["NCMM mission document, Jan 2025","https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf",G],["CPCB battery EPR dashboard","https://eprbattery.cpcb.gov.in/user/nationaldashboard",G]]},
+ {r:"4.7.3",t:"Outreach and Public Awareness",s:"ok",b:0,
+  lead:"The NCMM Outreach Forum was launched on 6 June 2025, and the governance tiers below it are meeting.",
+  m:"The government will establish a Critical Minerals Forum and Outreach Program as a platform for collaboration and innovation, involving government entities, PSUs, private companies, civil society organisations and other stakeholders, with regular sessions, networking events, workshops and knowledge-sharing, and monitoring of global trends.",
+  p:["The National Critical Mineral Mission Outreach Forum was launched on 6 June 2025 by Union Minister for Coal and Mines G. Kishan Reddy, as a platform for cooperation among government agencies, industry, academia, research institutions and private players.",
+     "It was launched on the sidelines of the Critical Minerals Processing Seminar held the same day, which convened government, industry, academia and research institutions on processing and recycling of lithium, cobalt, graphite and rare earths.",
+     "The supporting governance tiers are meeting: the fourth Inter-Ministerial Group on Critical Minerals convened on 20 March 2025 under the Secretary (Mines), and the first Empowered Committee under the Cabinet Secretary on 11 September 2025.",
+     "The Rashtriya Khanij Chintan Shivir was held in January 2026, where mission progress was presented, and an outreach programme and open-house for prospective offshore bidders was held in New Delhi in October 2026.",
+     "The forum publishes no proceedings or membership, so its activity is visible only through event reporting."],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]}]},
+
+{id:"4.8",name:"Funding, Financing and Fiscal Incentives",
+ blurb:"₹16,300 crore allocated across eleven heads, with ₹18,000 crore expected from PSUs. The Demands for Grants now show the scheme's provision, and it has moved sharply in both directions.",
+ fin:["Mission outlay ₹16,300 cr","Expected PSU investment ₹18,000 cr","Additional budgetary support sought ₹2,600 cr"],
+ subs:[
+ {r:"4.8.1",t:"Developing appropriate Fiscal Measures",s:"ann",b:0,
+  lead:"Proposal with the Finance Ministry since 3 November 2025; no decision published.",
+  m:"The mission will develop fiscal measures to incentivise junior exploration and mining companies, which may include tax credits and soft loans for investments in critical minerals exploration and development, and mechanisms to lower risk for investors while ensuring companies have the capital needed. The mission also aims to include the critical mineral value chain in the Harmonised Master List of infrastructure sub-sectors.",
+  p:["A proposal on Fiscal Incentives for Development of the Critical Mineral Value Chain in India was submitted to the Ministry of Finance on 3 November 2025.",
+     "The proposed measures include a tax holiday, a concessional tax regime, accelerated depreciation and deduction for expenditure on scientific research.",
+     "No decision has been published. Inclusion in the Harmonised Master List has not been reported.",
+     "Separately, a lithium and nickel processing incentive of approximately ₹3,000 crore was announced by the Mines Secretary on 22 September 2026 and remains awaiting approval, with no guidelines, rate structure or capacity target published."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G],["Processing incentive reporting, Sep 2026","https://thatsmyev.com/news/india-lithium-nickel-processing-incentive-scheme-ev-battery",""]]},
+ {r:"4.8.2",t:"Leveraging funding from International Financial Institutions",s:"ok",b:0,
+  lead:"Technical assistance being received from the World Bank and ADB; financing talks, not signed facilities.",
+  m:"The government will take steps to leverage finance for the development of critical minerals and enable participation in international development programmes of institutions such as the World Bank, the Asian Development Bank and the IMF, through initiatives like the Resilient and Inclusive Supply-chain Enhancement and the Advanced Sustainable Clean Energy Network for Development, with emphasis on securing loans from multilateral financial institutions.",
+     p:["Technical assistance is being received from the World Bank and the Asian Development Bank to support mission activities. No loan, grant agreement, amount or disbursement has been published, so this is advisory support rather than secured finance.",
+     "De-risking is being pursued through risk mitigation instruments supported by multilateral institutions including MIGA and the ADB. These are described as being explored, not concluded.",
+     "Multiple discussions have been held with IIFCL, NIIF and EXIM Bank on debt and equity financing. Discussions are not approvals, and no facility has been announced."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]},
+ {r:"4.8.3",t:"Financial Outlay for the Mission",s:"live",b:0,
+  lead:"BE 2025-26 of ₹410.00 crore reduced to ₹90.00 crore at RE; BE 2026-27 of ₹440.00 crore, plus ₹500.00 crore through NMEDT.",
+  m:"The mission includes budgetary provisions for securing domestic and foreign sourcing of critical minerals and for strengthening critical minerals value chains, totalling ₹16,300 crore across eleven finance heads to FY 2030-31, with ₹18,000 crore expected from PSUs. ₹2,600 crore is to be sought as additional budgetary support, and administrative expenditure is borne by the Ministry's own budget.",
+  p:["The Demands for Grants in the Ministry of Mines Annual Report 2025-26 provide the first published figures for the Central Sector Scheme. NCMM carries a Budget Estimate of ₹410.00 crore for 2025-26, a Revised Estimate of ₹90.00 crore, and a Budget Estimate of ₹440.00 crore for 2026-27.",
+     "A second line, NCMM activities funded through NMEDT, is provided at ₹500.00 crore at BE 2026-27, against nil at both BE and RE in 2025-26. A material share of mission activity is therefore being routed through trust funds rather than through the Consolidated Fund.",
+     "Provision across both heads through BE 2026-27 is approximately ₹1,030 crore against the seven-year outlay of ₹16,300 crore, with two of the seven years elapsed.",
+     "NMEDT accounts show ₹7,158.13 crore accrued and ₹3,589.59 crore expended since inception, with ₹971.42 crore accrued and ₹396.08 crore expended during January to December 2025 and an estimated ₹137 crore for January to March 2026. These figures include the Coal Promotional Scheme and are not confined to critical minerals.",
+     "No head-wise utilisation statement has been issued against the eleven finance heads of the mission outlay: domestic exploration ₹3,000 crore NMET and ₹4,000 crore GSI; foreign sourcing risk coverage ₹4,000 crore; exploration outside India ₹1,600 crore; recycling incentive ₹1,500 crore; pilot recovery projects ₹100 crore; domestic R&D and HRD ₹500 crore; international R&D ₹500 crore; skill development ₹100 crore; processing parks ₹500 crore; stockpiling ₹500 crore.",
+     "The reduction from BE to RE in 2025-26 is the single most consequential figure in the mission's published record, and the Annual Report offers no explanation for it."],
+  g:[{a:1030,b:16300,l:"Budget provision through BE 2026-27, ₹ crore",s:"v",d:"FY 2026-27 BE",r:"Budget provision, not expenditure. ₹410 cr BE plus ₹90 cr RE for 2025-26 and ₹440 cr plus ₹500 cr NMEDT at BE 2026-27, against the approved seven-year outlay. Outlay, provision, release and expenditure are four different measures."},
+     {a:null,b:16300,l:"Expenditure against outlay, ₹ crore",s:"u",d:"23 Oct 2026",r:"No head-wise release or expenditure statement has been published for the mission's eleven finance heads in any budget document, annual report or parliamentary answer reviewed."}],
+  src:[["MoM Annual Report 2025-26","https://mines.gov.in/admin/download/69945dabea1821771330987.pdf",G],["NCMM mission document, Jan 2025","https://mines.gov.in/admin/download/67b2ca1f8e8df1739770399.pdf",G]]},
+ {r:"4.8.4",t:"Dovetailing with Existing Schemes",s:"live",b:1,
+  lead:"Happening in practice between the mission and the battery EPR regime, but never mapped in a published document.",
+  m:"The financing mechanism is based on a whole-of-government-and-industries approach. Certain activities are funded by government and many are taken up as commercial decisions by public and private companies. While formulating specific schemes and guidelines, it will be ensured that any existing scheme similar to the proposed activities is dovetailed into mission activities.",
+  p:["The recycling incentive operates alongside the EPR regime under the Battery Waste Management Rules administered by MoEFCC and CPCB, and the mission reports its recycling output directly from the CPCB dashboard.",
+     "Customs relief is delivered through the Finance Ministry and the ACC PLI through the Ministry of Heavy Industries, neither of which is coordinated through a published mission mapping.",
+     "No document setting out which existing schemes have been dovetailed, and on what terms, has been issued."],
+  src:[["NCMM progress deck, Jan 2026","https://mines.gov.in/admin/storage/ckeditor/NCMM'_1768030756.pdf",G]]}]}
+];
+
+let sel=D[0].id, filt=new Set(), batOnly=false, q="", open=new Set();
+const el=(t,c,x)=>{const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n};
+const pct=(a,b)=>Math.max(0,Math.min(100,b?Math.round(a/b*100):0));
+
+const fmt=v=>v==null?"—":v.toLocaleString("en-IN");
+
+/* One renderer for every number on the page. The state decides what is drawn:
+   an unreported value never fills a track, and a non-comparable value is never
+   drawn as a share of its target. */
+function metric(m,full){
+  const d=el("div","t");
+  d.appendChild(el("span","lab",m.l));
+  const n=el("div","num");
+  if(m.s==="u"){
+    const p=el("span","mstate","Not reported");
+    p.style.color=MS.u[1];p.style.background=MS.u[2];n.appendChild(p);
+    n.appendChild(el("span","of","target "+fmt(m.b)));
+  }else{
+    n.appendChild(el("span",null,fmt(m.a)));
+    n.appendChild(el("span","of","/ "+fmt(m.b)));
+    if(m.s!=="v"){
+      const p=el("span","mstate",MS[m.s][0]);
+      p.style.color=MS[m.s][1];p.style.background=MS[m.s][2];n.appendChild(p);
+    }
+  }
+  d.appendChild(n);
+  const cls="bar"+(m.s==="u"?" unrep":m.s==="z"?" zero":m.s==="n"?" ncomp":(m.a>=m.b&&m.b?" over":""));
+  const w=el("div",cls);
+  if(m.s!=="u"){const i=el("i");i.style.width=pct(m.a,m.b)+"%";w.appendChild(i)}
+  d.appendChild(w);
+  if(m.d)d.appendChild(el("span","note","As at "+m.d));
+  if(full&&m.r)d.appendChild(el("span","basis",m.r));
+  return d;
+}
+
+function legend(){
+  const L=document.getElementById("legend");
+  const rows=[["v","Verified against a government source"],["z","Confirmed none — the thing does not exist"],["u","Not reported — no figure published either way"],["n","Not comparable with the mission's target"]];
+  rows.forEach(([k,t])=>{
+    const r=el("div","lg");
+    const b=el("span","lgb");
+    if(k==="u")b.style.background="repeating-linear-gradient(135deg,var(--surface-2),var(--surface-2) 3px,var(--line) 3px,var(--line) 4px)";
+    else if(k==="v")b.style.background="var(--brand)";
+    else b.style.boxShadow="inset 0 0 0 1px var(--line-strong)";
+    r.appendChild(b);r.appendChild(el("span",null,t));L.appendChild(r);
+  });
+}
+
+function targets(){
+  const g=document.getElementById("tgrid");
+  TARGETS.forEach(t=>g.appendChild(metric(t,true)));
+  const btn=document.getElementById("rulesbtn");
+  btn.onclick=()=>{const on=g.classList.toggle("rules");btn.setAttribute("aria-pressed",on)};
+}
+
+function rail(){
+  const r=document.getElementById("rail");r.innerHTML="";
+  D.forEach(c=>{
+    const b=el("button","ct");b.type="button";b.setAttribute("aria-pressed",c.id===sel);
+    b.appendChild(el("span","cnum",c.id));
+    b.appendChild(el("span","cname",c.name));
+    const seg=el("div","seg");
+    c.subs.forEach(s=>{const i=el("i");i.style.background=S[s.s][1];if(s.s==="none")i.style.background="var(--line-strong)";seg.appendChild(i)});
+    b.appendChild(seg);
+    const nb=c.subs.filter(s=>s.b).length;
+    b.appendChild(el("span","cmeta",c.subs.length+" sub-components"+(nb?" · "+nb+" battery":"")));
+    b.onclick=()=>{sel=c.id;open.clear();rail();render();document.getElementById("main").scrollIntoView({behavior:"smooth",block:"start"})};
+    r.appendChild(b);
+  });
+}
+
+function controls(){
+  const c=document.getElementById("controls");c.innerHTML="";
+  Object.keys(S).forEach(k=>{
+    const b=el("button","chip");b.type="button";b.setAttribute("aria-pressed",filt.has(k));
+    const d=el("span","dot");d.style.background=S[k][1];
+    if(k==="none"){d.style.background="transparent";d.style.border="1.5px dashed var(--none)"}
+    b.appendChild(d);b.appendChild(el("span",null,S[k][0]));
+    b.onclick=()=>{filt.has(k)?filt.delete(k):filt.add(k);controls();render()};
+    c.appendChild(b);
+  });
+  const bt=el("button","chip");bt.type="button";bt.setAttribute("aria-pressed",batOnly);
+  bt.textContent="Battery-relevant only";
+  bt.onclick=()=>{batOnly=!batOnly;controls();render()};
+  c.appendChild(bt);
+  c.appendChild(el("div","spacer"));
+  const i=document.createElement("input");i.id="q";i.type="search";i.placeholder="Search all 35 sub-components";i.value=q;
+  i.oninput=e=>{q=e.target.value.toLowerCase();render()};
+  c.appendChild(i);
+}
+
+function matches(s){
+  if(filt.size&&!filt.has(s.s))return false;
+  if(batOnly&&!s.b)return false;
+  if(q){const hay=(s.r+" "+s.t+" "+s.lead+" "+s.m+" "+s.p.join(" ")).toLowerCase();if(!hay.includes(q))return false}
+  return true;
+}
+
+function card(s){
+  const w=el("div","sc"+(s.b?" bat":""));
+  const h=el("button","sch");h.type="button";
+  const isOpen=open.has(s.r);
+  h.setAttribute("aria-expanded",isOpen);
+  h.appendChild(el("span","ref",s.r));
+  const mid=el("div","mid");
+  mid.appendChild(el("div","st",s.t));
+  mid.appendChild(el("div","sl",s.lead));
+  h.appendChild(mid);
+  const p=el("span","pill",S[s.s][0]);
+  p.style.color=S[s.s][1];p.style.background=S[s.s][2];
+  if(s.s==="none"){p.style.border="1px dashed var(--none)"}
+  h.appendChild(p);
+  h.appendChild(el("span","caret",isOpen?"–":"+"));
+  h.onclick=()=>{isOpen?open.delete(s.r):open.add(s.r);render()};
+  w.appendChild(h);
+  if(isOpen){
+    const b=el("div","scb");
+    const m=el("div","mand");m.appendChild(el("b",null,"What the mission commits to"));m.appendChild(el("p",null,s.m));
+    b.appendChild(m);
+    b.appendChild(el("div","ph","Progress to October 2026"));
+    const ul=el("ul");s.p.forEach(x=>ul.appendChild(el("li",null,x)));b.appendChild(ul);
+    if(s.st&&s.st.length){
+      b.appendChild(el("div","ph","Delivery stages"));
+      const lad=el("div","ladder");
+      s.st.forEach(([name,done,ev])=>{
+        const row=el("div","rung"+(done?" done":""));
+        row.appendChild(el("span","tick",done?"●":"○"));
+        row.appendChild(el("span","rname",name));
+        row.appendChild(el("span","rev",ev||(done?"":"no evidence identified")));
+        lad.appendChild(row);
+      });
+      b.appendChild(lad);
+    }
+    if(s.g&&s.g.length){
+      b.appendChild(el("div","ph","Against the mission target"));
+      const tb=el("div","tbox");
+      s.g.forEach(g=>tb.appendChild(metric(g,true)));
+      b.appendChild(tb);
+    }
+    if(s.ev){
+      const e=el("div","scope");
+      e.appendChild(el("b",null,"Scope of the negative finding"));
+      e.appendChild(el("p",null,s.ev));
+      b.appendChild(e);
+    }
+    b.appendChild(el("div","ph","Sources"));
+    const sr=el("div","src");
+    s.src.forEach(([l,u,g])=>{
+      const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";
+      a.appendChild(el("span","tierdot",g?"GOV":"PRESS"));
+      a.appendChild(document.createTextNode(l));
+      if(g)a.className="gov";sr.appendChild(a)});
+    b.appendChild(sr);
+    w.appendChild(b);
+  }
+  return w;
+}
+
+function render(){
+  const m=document.getElementById("main");m.innerHTML="";
+  const c=D.find(x=>x.id===sel);
+  const h=el("div","chead");
+  h.appendChild(el("div","ckicker","Component "+c.id));
+  h.appendChild(el("h2",null,c.name));
+  h.appendChild(el("p",null,c.blurb));
+  if(c.fin.length){const f=el("div","fin");c.fin.forEach(x=>f.appendChild(el("span",null,x)));h.appendChild(f)}
+  m.appendChild(h);
+  const list=c.subs.filter(matches);
+  const wrap=el("div","subs");
+  if(!list.length){wrap.appendChild(el("div","empty","No sub-component in this component matches the current filters."))}
+  list.forEach(s=>wrap.appendChild(card(s)));
+  m.appendChild(wrap);
+}
+
+legend();targets();rail();controls();render();
+</script>
+
+</body></html>
